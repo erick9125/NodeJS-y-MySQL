@@ -1,4 +1,5 @@
 const mysql =  require('mysql');
+const { promisify} = require('util')
 const {database} = require('./keys');
 
 const pool = mysql.createPool(database);
@@ -8,7 +9,19 @@ pool.getConnection((err, connection) => {
             console.error('LA CONEXION A LA BASE DE DATOS FUE CERRADA');
         }
         if( err.code === 'ER_CON_COUNT_ERROR') {
-            console.error('DATABASE HAS TO MANY CONNECTIONS');
+            console.error('LA BASE DE DATOS TIENE MUCHAS CONEXIONES');
+        }
+        if (err.code === 'ECONNREFUSED') {
+            console.error('LA BASE DE DATOS FUE RECHAZADA');
         }
     }
-})
+
+    if (connection) connection.release();
+    console.log('BD esta conectada');
+    return;
+});
+
+//se convierten a promesas
+pool.query = promisify(pool.query);
+
+module.exports = pool;
