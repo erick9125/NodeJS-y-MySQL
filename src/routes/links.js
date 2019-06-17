@@ -2,13 +2,15 @@ const express = require('express');
 const router = express.Router();
 
 const pool = require('../database');
+const {isLoggedIn} = require('../lib/auth');
 
-router.get('/add', (req, res) => {
+//ruta para agregar nuevos links
+router.get('/add', isLoggedIn, (req, res) => {
     res.render('links/add')
 });
 
 //metodo que guarda los elementos en la BD
-router.post('/add', async (req , res) => {
+router.post('/add', isLoggedIn, async (req , res) => {
     const {title, url, description} = req.body;
     const newLink = {
         title,
@@ -22,14 +24,14 @@ router.post('/add', async (req , res) => {
 });
 
 //metodo que lista los elementos guardados en la BD
-router.get('/', async (req, res) => {
+router.get('/', isLoggedIn, async (req, res) => {
     const links = await pool.query('SELECT * FROM links');
     console.log(links);
     res.render('links/list',{links});
 });
 
 //metodo para eliminar elementos
-router.get('/delete/:id' , async (req, res) => {
+router.get('/delete/:id' , isLoggedIn, async (req, res) => {
     const { id } = req.params;
     await pool.query('DELETE FROM links WHERE ID = ?', [id]);
     req.flash('exito','Link eliminado satisfactoriamente');
@@ -37,13 +39,13 @@ router.get('/delete/:id' , async (req, res) => {
 });
 
 //metodo para editar elementos
-router.get('/edit/:id', async (req, res) => {
+router.get('/edit/:id', isLoggedIn, async (req, res) => {
     const {id} = req.params;
  const links = await pool.query('SELECT * FROM links WHERE id = ?', [id]);
   res.render('links/edit', {link: links[0]});
 });
 
-router.post('/edit/:id', async (req, res) => {
+router.post('/edit/:id', isLoggedIn, async (req, res) => {
     const {id} = req.params;
     const {title,url,description} = req.body;
     const newLink = {

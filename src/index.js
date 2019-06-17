@@ -45,6 +45,7 @@ app.use(passport.session());
 app.use((req, res, next) => {
     app.locals.exito = req.flash('exito'); 
     app.locals.message = req.flash('message');
+    app.locals.user = req.user;
     next();
 });
 
